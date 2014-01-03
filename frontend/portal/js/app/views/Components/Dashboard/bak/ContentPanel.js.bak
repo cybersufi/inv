@@ -1,0 +1,163 @@
+Ext.define('App.views.Components.Dashboard.ContentPanel', {
+    require             :   [
+                                'App.models.DashboardItem',
+                                'App.stores.DashboardItemStore',
+                            ], 
+	extend	            : 'Ext.panel.Panel',
+	alias               : 'widget.ContentPanel',
+    layout              : 'fit',
+
+	itemstore           : null,
+    model               : 'App.models.ServerGroup',
+
+    buttonTextMode      : 'hide',
+    addButtonText       : "Add Item",
+    addButtonIcon       : App.getResource('resources/silkicons/add.png'),
+    itemStore           : null,
+    innerTable          : null,
+    editorDialog        : null,
+	
+	initComponent: function () {
+
+        this.itemstore = Ext.create('App.stores.ServerGroupStore', {});
+        this.itemstore.on('update', this.onStoreLoad, this);
+
+        this.addButton = Ext.create("Ext.button.Button", {
+            text: (this.buttonTextMode !== "hide") ? this.addButtonText : '',
+            tooltip: this.addButtonText,
+            icon: this.addButtonIcon,
+            handler: Ext.bind(this.onItemAdd, this)
+        });
+
+        this.searchField = Ext.create("Ext.ux.SearchField",{
+            store: this.itemstore,
+        });
+        
+        this.topToolbar = Ext.create("Ext.toolbar.Toolbar",{
+            dock: 'top',
+            enableOverflow: true,
+            items: [
+                this.addButton,
+                { xtype: 'tbfill' },
+                this.searchField
+            ]
+        });
+
+        this.dockedItems = new Array();
+
+        this.dockedItems.push(this.topToolbar);
+        
+        this.innerTable = Ext.create('Ext.Container', {
+            autoEl: 'div',
+            layout:{
+                type: 'table',
+                columns: 5,
+                tdAttrs: { style: 'padding: 10px;' }
+            },
+            defaults:{
+                height: 100,
+                width: 200,
+                bodyPadding: 10
+            },
+            autoScroll: true,
+        });
+
+        this.on('render',
+            function() {
+                this.innerTable.render(this.el);
+            },
+        this);
+
+        this.items = this.innerTable;
+
+        this.callParent();
+	},
+
+    setFlag: function(flag) {
+        if (this.itemstore != null ) {
+            this.itemstore.getProxy().extraParams['flag'] = flag;
+            this.reload();
+        } else {
+            alert('no store');
+        }
+    },
+
+    reload: function() {
+        this.setLoading();
+        this.itemstore.load({
+            scope: this,
+            callback: this.onStoreLoad
+        })
+    },
+
+    onStoreLoad: function(records, operation, success) {
+        var reccount = count(records);
+        var buf = [];
+
+        this.innerTable.removeAll();
+
+        for (i=0; i < reccount; i++) {
+            var pan = this.createPanel(records[i]);
+            this.innerTable.add(pan);
+        }
+        
+        this.setLoading(false);
+        this.doLayout();
+    },
+
+    createPanel: function(r) {
+        var pp = Ext.create('App.views.Components.Dashboard.GroupItem', {
+            id: 'id-' + r.get('id'),
+            itemId: 'item-' + r.get('id'),
+            rec: r,
+        });
+
+        pp.on({
+            deletepanel: this.onPanelDelete,
+            editpanel: this.onPanelEdit,
+            editlists: this.onPanelItemEdit,
+            scope: this
+        });
+
+        return pp;
+    },
+
+    createDialog: function(dialogmode) {
+        if (this.editorDialog != null) {
+            this.editorDialog.close();
+            this.editorDialog = null;
+        }
+
+        this.editorDialog = Ext.create('App.views.Components.Dashboard.ItemEditorWindow', {
+            mode: dialogmode
+        });
+
+        this.editorDialog.on('itemSaved',    Ext.bind(this.onItemSaved,  this));
+    },
+
+    onItemAdd: function() {
+        this.createDialog('create');
+        var def = null;
+        Ext.apply(def, {});
+        record = Ext.create(this.model, def);
+        this.editorDialog.addDefault(def);
+        this.editorDialog.editItem(record);
+        this.editorDialog.show();  
+    },
+
+    onItemSaved: function() {
+        this.reload();
+    },
+
+    onPanelDelete: function(id) {
+        alert ('panelDelete clicked with id: '+id);
+    },
+
+    onPanelEdit: function() {
+        alert ('panelEdit clicked');
+    },
+
+    onPanelItemEdit: function() {
+        alert ('panelItemEdit clicked');
+    },
+});
