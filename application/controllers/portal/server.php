@@ -76,7 +76,7 @@ class Server extends MY_Controller {
     		$this->member->addFilter('id', $itemid, 'string');
 	    }
 
-		/*$res = $this->group->get();
+		$res = $this->group->get();
 
 		if ($res['status'] == true) {
 			$data['response'] =create_result($this->getTimmingStart(), $res['result']);
@@ -86,6 +86,6 @@ class Server extends MY_Controller {
 
 		$this->group->clearParameter();
 
-    	$this->load->view($this->out, $data);*/
+    	$this->load->view($this->out, $data);
 	}
 }

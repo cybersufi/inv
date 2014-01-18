@@ -7,6 +7,9 @@ class Servermodel extends MY_Model {
 	
 	public function __construct() {
 		parent::__construct();
+
+		$this->addJoinTable("servergroups", "groupid", "id");
+
 		$this->server = (object) array(
 			'id' 		=> $this->table_name.'.id',
 			'name' 		=> $this->table_name.'.servername',
@@ -15,7 +18,8 @@ class Servermodel extends MY_Model {
 			'note' 		=> $this->table_name.'.servernote',
 			'path'		=> $this->table_name.'.serverpath',
 			'status' 	=> $this->table_name.'.status',
-			'groupid'	=> $this->table_name.'.groupid'
+			'groupid'	=> $this->table_name.'.groupid',
+			'groupname'	=> $this->getJoinTable('servergroups')->table_name.'.groupname'
 		);
 
 		$keyAssoc = array (
@@ -26,7 +30,8 @@ class Servermodel extends MY_Model {
 			'servernote'	=> $this->server->note,
 			'serverpath'	=> $this->server->path,
 			'status' 		=> $this->server->status,
-			'groupid'		=> $this->server->groupid
+			'groupid'		=> $this->server->groupid,
+			'groupname'		=> $this->server->groupname
 		);
 
 		$this->setSortFieldAssociaton($keyAssoc);
@@ -34,6 +39,9 @@ class Servermodel extends MY_Model {
 	}
 
 	public function get() {
+
+		$jt = $this->getJoinTable("servergroups");
+
 		$sql = $this->db->select($this->server->id.', '.
 							     $this->server->name.', '.
 							     $this->server->alias.', '.
@@ -41,8 +49,10 @@ class Servermodel extends MY_Model {
 							     $this->server->ip.', '.
 							     $this->server->path.', '.
 							     $this->server->status.','.
-							     $this->server->groupid)
- 		->from($this->table_name);
+							     $this->server->groupid.','.
+							     $this->server->groupname)
+ 		->from($this->table_name)
+ 		->join($jt->table_name, $jt->source_column.' = '.$jt->dest_column, 'left');
 
  		if ($this->isFiltered()) {
 			$where = $this->getFilterString();
@@ -54,7 +64,7 @@ class Servermodel extends MY_Model {
 			foreach ($sort as $property => $direction) {
 				$this->db->order_by($property, $direction);
 			}
-			$this->db->order_by($this->member->id, 'ASC');
+			$this->db->order_by($this->server->id, 'ASC');
 		}
 
 		if ($this->isLimited()) {
@@ -75,7 +85,7 @@ class Servermodel extends MY_Model {
 		return $this->result;
 	}
 
-	public function add($name, $alias, $ip, $path, $note) {
+	public function add($name, $alias, $ip, $path, $note, $groupid=null) {
 		$this->db->set($this->server->name, 	$name);
     	$this->db->set($this->server->alias, 	$alias);
     	$this->db->set($this->server->alias, 	$ip);
@@ -105,7 +115,7 @@ class Servermodel extends MY_Model {
     	}
     }
 
-	public function edit($name, $alias, $ip, $path, $note) {
+	public function edit($name, $alias, $ip, $path, $note, $groupid=null) {
 		$param = array(
     		$this->server->name => $name,
     		$this->server->alias => $alias,

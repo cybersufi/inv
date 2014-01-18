@@ -14,9 +14,29 @@ class MY_Model extends CI_Model {
 	private $filterArray 		= array('field', 'value', 'type');
 	private $sorterArray 		= array('property', 'direction');
 
+	protected $join_tables		= array();
 
 	public function __construct() {
 		parent::__construct();
+	}
+
+	public function addJoinTable($table_name, $source_column, $dest_column){
+		$this->join_tables[$table_name] = (object) array (
+			'table_name' => $table_name,
+			'source_column' => $source_column,
+			'dest_column' => $table_name.".".$dest_column
+		);
+	}
+
+	public function getJoinTable($table_name=NULL) {
+		if ($table_name != NULL) {
+			if (array_key_exists($table_name, $this->join_tables)) {
+				return $this->join_tables[$table_name];
+			}
+		} else {
+			return $this->join_tables;
+		}
+		return null;
 	}
 	
 	public function setResult($status=false, $result=NULL) {

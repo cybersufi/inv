@@ -225,7 +225,7 @@ class Servergroup extends MY_Controller {
 		return null;
 	}
 
-	public function groupandmember() {
+	public function grouptree() {
 		$this->load->model('portal/servergroupmodel', 'group');
 		$res = $this->group->getTreeStructure();
 
