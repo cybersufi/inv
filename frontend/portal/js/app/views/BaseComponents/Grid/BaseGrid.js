@@ -11,7 +11,7 @@ Ext.define('App.views.BaseComponents.Grid.BaseGrid', {
 	 */
 	initComponent: function () {
 		
-		this.plug = Ext.create("App.views.Components.Grid.GridMenu");
+		this.plug = Ext.create("App.views.BaseComponents.Grid.GridMenu");
 
 		/**
 		 * Check if the plugins already exist (e.g. by a superclass). If yes, assume it is an array, and append

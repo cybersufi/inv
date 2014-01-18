@@ -27,6 +27,7 @@ Ext.define('App.views.Components.Dashboard.ContentPanel', {
         );
 
         this.itemstore = Ext.create('App.stores.ServerGroupStore', {});
+        this.itemstore.proxy.limitParam = null;
 
         this.viewpanel = Ext.create('App.views.Components.Dashboard.DashboardDataView', {
             store: this.itemstore,

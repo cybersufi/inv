@@ -90,10 +90,15 @@ Ext.application({
         });
 
         this.addItem(a);
+        this.setActiveTab(0);
     },
 
     addItem: function (a) {
         return this.centerPanel.add(a)
+    },
+
+    setActiveTab: function(tabNumber) {
+        return this.centerPanel.setActiveTab(tabNumber);
     },
 
     findPanel: function (id) {
